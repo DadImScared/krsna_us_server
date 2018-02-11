@@ -2,11 +2,13 @@
 import requests
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
-from rest_framework import generics, permissions
+from django.db.models import F
+from rest_framework import generics, permissions, mixins, viewsets
 from rest_framework.views import APIView, Response
 from rest_auth.registration.views import SocialLoginView
-from .models import HarikathaCollection
-from .serializers import HarikathaItem, Suggestion, ElasticsearchItem
+
+from .models import HarikathaCollection, Playlists, PlaylistItem
+from .serializers import HarikathaItem, Suggestion, ElasticsearchItem, PlaylistsSerializer, PlaylistItemSerializer, PlaylistItemUpdateSerializer
 from .search import HarikathaIndex
 from .utils import PaginatedQuery
 
@@ -46,11 +48,66 @@ class AccountConfirm(APIView):
         return Response()
 
 
-class PlayListsView(generics.GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+# class PlayListsView(generics.ListCreateAPIView):
+#     permission_classes = (permissions.IsAuthenticated,)
+#     serializer_class = PlaylistsSerializer
+#
+#     def get_queryset(self):
+#         return Playlists.objects.filter(creator=self.request.user)
 
-    def get(self, request, *args, **kwargs):
-        return Response({'authenticated': request.user.username})
+
+class PlaylistsViewSet(viewsets.ModelViewSet):
+    serializer_class = PlaylistsSerializer
+    lookup_field = 'playlist_id'
+
+    def get_queryset(self):
+        return Playlists.objects.filter(creator=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(creator=self.request.user)
+
+
+class PlaylistItemsViewSet(viewsets.ModelViewSet):
+    serializer_class = PlaylistItemSerializer
+    lookup_field = 'item_id'
+
+    def get_serializer_class(self):
+        if self.action == 'partial_update':
+            return PlaylistItemUpdateSerializer
+        return PlaylistItemSerializer
+
+    def get_queryset(self):
+        return PlaylistItem.objects.filter(
+            playlist__creator=self.request.user,
+            playlist__playlist_id=self.request.query_params.get('playlist_id')
+        )
+
+    def perform_create(self, serializer):
+        playlist = Playlists.objects.get(
+            creator=self.request.user,
+            playlist_id=self.request.query_params.get('playlist_id')
+        )
+        serializer.save(playlist=playlist, item_order=self.get_queryset().count())
+
+    def partial_update(self, request, *args, **kwargs):
+        playlist = Playlists.objects.get(
+            creator=self.request.user,
+            playlist_id=self.request.query_params.get('playlist_id')
+        )
+        serializer = self.get_serializer(self.get_object(), data=request.data, partial=True)
+        serializer.is_valid()
+        current_order = self.get_object().item_order
+        new_order = request.data['new_order']
+        queryset = self.get_queryset()
+        if int(new_order) < current_order:
+            items = queryset.filter(playlist=playlist, item_order__lt=current_order, item_order__gte=new_order)
+            items.update(item_order=F('item_order') + 1)
+        else:
+            queryset.filter(
+                item_order__gt=current_order, item_order__lte=new_order
+            ).update(item_order=F('item_order') - 1)
+        serializer.save()
+        return Response(PlaylistItemSerializer(instance=self.get_object()).data)
 
 
 class GoogleLogin(SocialLoginView):

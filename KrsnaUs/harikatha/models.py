@@ -69,3 +69,23 @@ class HarikathaCollection(models.Model):
         )
         obj.save()
         return obj.to_dict(include_meta=True)
+
+
+class Playlists(models.Model):
+    creator = models.ForeignKey(User, related_name='playlists', on_delete=models.CASCADE)
+    name = models.TextField()
+    playlist_id = models.UUIDField(default=uuid.uuid4, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class PlaylistItem(models.Model):
+    playlist = models.ForeignKey(Playlists, related_name='items')
+    collection_item = models.ForeignKey(HarikathaCollection)
+    item_id = models.UUIDField(default=uuid.uuid4, unique=True)
+    item_order = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['item_order']
