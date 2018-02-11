@@ -32,6 +32,18 @@ def clean_up_factories():
             obj.reset_sequence(0)
 
 
+class BaseTestCase(APITestCase):
+
+    def setUp(self):
+        self.user = factories.UserFactory(playlists=5, playlists__items=10)
+        self.playlist = self.user.playlists.all()[0]
+        self.items = self.playlist.items.all()
+        self.client.force_authenticate(user=self.user)
+
+    def tearDown(self):
+        clean_up_factories()
+
+
 class HariKathaCollectionViewTestWithCategories(APITestCase):
     fixtures = ['fulldata.json']
 
@@ -124,16 +136,7 @@ class TestPlaylists(APITestCase):
         self.assertEqual(response.data['name'], playlist.name)
 
 
-class TestPlaylistItems(APITestCase):
-
-    def setUp(self):
-        self.user = factories.UserFactory(playlists=5, playlists__items=10)
-        self.playlist = self.user.playlists.all()[0]
-        self.items = self.playlist.items.all()
-        self.client.force_authenticate(user=self.user)
-
-    def tearDown(self):
-        clean_up_factories()
+class TestPlaylistItems(BaseTestCase):
 
     def test_user_can_retrieve_playlist_items(self):
         item_id = self.items[0].item_id
