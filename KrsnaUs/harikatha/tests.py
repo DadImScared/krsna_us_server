@@ -88,7 +88,6 @@ class TestPaginatedQuery(TestCase):
 
 
 class TestLogin(APITestCase):
-
     def test_login(self):
         """Tests user can log in and then use token to access protected route"""
         username = 'testuser'
@@ -107,15 +106,7 @@ class TestLogin(APITestCase):
         self.assertEqual(200, response2.status_code)
 
 
-class TestPlaylists(APITestCase):
-
-    def setUp(self):
-        self.user = factories.UserFactory.create()
-        self.client.force_authenticate(user=self.user)
-
-    def tearDown(self):
-        clean_up_factories()
-
+class TestPlaylists(BaseTestCase):
     def test_user_can_create_playlist(self):
         before_count = Playlists.objects.count()
         playlist_name = 'my playlist'
@@ -129,15 +120,13 @@ class TestPlaylists(APITestCase):
         )
 
     def test_user_can_retrieve_playlist(self):
-        playlist = self.user.playlists.all()[0]
-        response = self.client.get(reverse('playlists-detail', args=(playlist.playlist_id,)))
+        response = self.client.get(reverse('playlists-detail', args=(self.playlist.playlist_id,)))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['playlist_id'], str(playlist.playlist_id))
-        self.assertEqual(response.data['name'], playlist.name)
+        self.assertEqual(response.data['playlist_id'], str(self.playlist.playlist_id))
+        self.assertEqual(response.data['name'], self.playlist.name)
 
 
 class TestPlaylistItems(BaseTestCase):
-
     def test_user_can_retrieve_playlist_items(self):
         item_id = self.items[0].item_id
         playlist_id = self.playlist.playlist_id
