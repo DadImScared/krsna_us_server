@@ -125,6 +125,25 @@ class TestPlaylists(BaseTestCase):
         self.assertEqual(response.data['playlist_id'], str(self.playlist.playlist_id))
         self.assertEqual(response.data['name'], self.playlist.name)
 
+    def test_user_can_view_all_playlists(self):
+        all_playlists = Playlists.objects.all()
+        response = self.client.get(reverse('playlists-all-playlists'))
+        self.assertEqual(all_playlists.count(), response.data['count'])
+        self.assertEqual(str(all_playlists[0].playlist_id), response.data['results'][0]['playlist_id'])
+
+    def test_un_authenticated_user_can_view_all_playlists(self):
+        self.client.logout()
+        all_playlists = Playlists.objects.all()
+        response = self.client.get(reverse('playlists-all-playlists'))
+        self.assertEqual(all_playlists.count(), response.data['count'])
+        self.assertEqual(str(all_playlists[0].playlist_id), response.data['results'][0]['playlist_id'])
+
+    def test_un_authenticated_user_can_view_playlist_detail(self):
+        self.client.logout()
+        response = self.client.get(reverse('playlists-detail', args=(self.playlist.playlist_id,)))
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(str(self.playlist.playlist_id), response.data['playlist_id'])
+
 
 class TestPlaylistItems(BaseTestCase):
     def test_user_can_retrieve_playlist_items(self):

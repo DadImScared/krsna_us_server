@@ -78,6 +78,9 @@ class Playlists(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['name']
+
 
 class PlaylistItem(models.Model):
     playlist = models.ForeignKey(Playlists, related_name='items')

@@ -4,6 +4,7 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from django.db.models import F
 from rest_framework import generics, permissions, mixins, viewsets
+from rest_framework.decorators import list_route
 from rest_framework.views import APIView, Response
 from rest_auth.registration.views import SocialLoginView
 
@@ -51,12 +52,26 @@ class AccountConfirm(APIView):
 class PlaylistsViewSet(viewsets.ModelViewSet):
     serializer_class = PlaylistsSerializer
     lookup_field = 'playlist_id'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
+        """Returns all Playlist objects if user is not authenticated else Playlist objects created by user"""
+        if self.action == 'retrieve' and not self.request.user.is_authenticated:
+            return Playlists.objects.all()
         return Playlists.objects.filter(creator=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
+
+    @list_route()
+    def all_playlists(self, request):
+        all_playlists = Playlists.objects.all()
+        page = self.paginate_queryset(all_playlists)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(all_playlists, many=True)
+        return Response(serializer.data)
 
 
 class PlaylistItemsViewSet(viewsets.ModelViewSet):
