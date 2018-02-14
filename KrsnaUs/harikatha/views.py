@@ -48,14 +48,6 @@ class AccountConfirm(APIView):
         return Response()
 
 
-# class PlayListsView(generics.ListCreateAPIView):
-#     permission_classes = (permissions.IsAuthenticated,)
-#     serializer_class = PlaylistsSerializer
-#
-#     def get_queryset(self):
-#         return Playlists.objects.filter(creator=self.request.user)
-
-
 class PlaylistsViewSet(viewsets.ModelViewSet):
     serializer_class = PlaylistsSerializer
     lookup_field = 'playlist_id'

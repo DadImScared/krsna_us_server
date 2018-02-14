@@ -97,7 +97,7 @@ class TestLogin(APITestCase):
         EmailAddress.objects.create(user=user, email='fakeemail@t.com', primary=True, verified=True)
         response = self.client.post(
             '/rest-auth/login/',
-            data={"username": 'testuser', "password": 'testpass', "email": 'fakeemail@t.com'}
+            data={"password": 'testpass', "email": 'fakeemail@t.com'}
         )
         response2 = self.client.get(
             '/api/v1/playlists/',
