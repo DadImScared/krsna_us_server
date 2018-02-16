@@ -141,18 +141,23 @@ class TestPlaylists(BaseTestCase):
     def test_un_authenticated_user_can_view_playlist_detail(self):
         self.client.logout()
         response = self.client.get(reverse('playlists-detail', args=(self.playlist.playlist_id,)))
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(str(self.playlist.playlist_id), response.data['playlist_id'])
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['playlist_id'], str(self.playlist.playlist_id))
 
 
 class TestPlaylistItems(BaseTestCase):
     def test_user_can_retrieve_playlist_items(self):
-        item_id = self.items[0].item_id
-        playlist_id = self.playlist.playlist_id
         response = self.client.get(url_with_query_string(
-            reverse('items-detail', args=(item_id,)), {'playlist_id': playlist_id}
+            reverse('items-list'), {'playlist_id': self.playlist.playlist_id}
         ))
-        self.assertEqual(200, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], self.playlist.name)
+        self.assertEqual(response.data['items_count'], self.playlist.items.count())
+
+    def test_user_can_retrieve_playlist_item(self):
+        item_id = self.items[0].item_id
+        response = self.client.get(reverse('items-detail', args=(item_id,)))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['item_id'], str(item_id))
         self.assertEqual(response.data['title'], self.items[0].collection_item.title)
         self.assertEqual(response.data['link'], self.items[0].collection_item.link)
@@ -181,7 +186,7 @@ class TestPlaylistItems(BaseTestCase):
             url_with_query_string(reverse('items-detail', args=(item.item_id,)), {'playlist_id': playlist.playlist_id}),
             {"new_order": 0}
         )
-        self.assertEqual(200, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['item_order'], 0)
         self.assertNotEqual(item, playlist.items.last())
         self.assertEqual(item, playlist.items.first())

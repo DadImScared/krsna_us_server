@@ -20,6 +20,7 @@ from .serializers import (
 )
 from .search import HarikathaIndex
 from .utils import PaginatedQuery
+from .my_permissions import CanWriteOrDeletePlaylist, CanWriteOrDeletePlaylistItem
 
 # Create your views here.
 
@@ -87,7 +88,7 @@ class PlaylistsViewSet(viewsets.ModelViewSet):
 class PlaylistItemsViewSet(viewsets.ModelViewSet):
     serializer_class = PlaylistItemSerializer
     lookup_field = 'item_id'
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, CanWriteOrDeletePlaylistItem)
 
     def get_serializer_class(self):
         if self.action == 'partial_update':
@@ -100,6 +101,8 @@ class PlaylistItemsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_queryset(self):
+        if self.action != 'list':
+            return PlaylistItem.objects.all()
         playlist_id = self.request.query_params.get('playlist_id')
         return PlaylistItem.objects.filter(
             playlist__creator=self.request.user,
