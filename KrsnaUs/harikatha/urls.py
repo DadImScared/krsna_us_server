@@ -12,7 +12,7 @@ from .views import (
 
 router = routers.SimpleRouter()
 router.register(r'playlists', PlaylistsViewSet, base_name='playlists')
-router.register(r'items', PlaylistItemsViewSet, base_name='items')
+router.register(r'playlistitems', PlaylistItemsViewSet, base_name='items')
 
 urlpatterns = [
     url(r'^items/(?P<category>[a-zA-Z]+)/$', HariKathaCategoryView.as_view(), name='items'),

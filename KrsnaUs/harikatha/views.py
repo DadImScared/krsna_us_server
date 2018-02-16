@@ -9,7 +9,15 @@ from rest_framework.views import APIView, Response
 from rest_auth.registration.views import SocialLoginView
 
 from .models import HarikathaCollection, Playlists, PlaylistItem
-from .serializers import HarikathaItem, Suggestion, ElasticsearchItem, PlaylistsSerializer, PlaylistItemSerializer, PlaylistItemUpdateSerializer
+from .serializers import (
+    HarikathaItem,
+    Suggestion,
+    ElasticsearchItem,
+    PlaylistsSerializer,
+    PlaylistItemSerializer,
+    PlaylistItemUpdateSerializer,
+    PlaylistWithItemsSerializer
+)
 from .search import HarikathaIndex
 from .utils import PaginatedQuery
 
@@ -56,9 +64,11 @@ class PlaylistsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Returns all Playlist objects if user is not authenticated else Playlist objects created by user"""
-        if self.action == 'retrieve' and not self.request.user.is_authenticated:
-            return Playlists.objects.all()
-        return Playlists.objects.filter(creator=self.request.user)
+        if not self.request.user.is_authenticated and self.action == 'list':
+            return []
+        if self.request.user.is_authenticated:
+            return Playlists.objects.filter(creator=self.request.user)
+        return Playlists.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
@@ -77,17 +87,24 @@ class PlaylistsViewSet(viewsets.ModelViewSet):
 class PlaylistItemsViewSet(viewsets.ModelViewSet):
     serializer_class = PlaylistItemSerializer
     lookup_field = 'item_id'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action == 'partial_update':
             return PlaylistItemUpdateSerializer
         return PlaylistItemSerializer
 
+    def list(self, request, *args, **kwargs):
+        playlist = Playlists.objects.get(playlist_id=request.query_params.get('playlist_id'))
+        serializer = PlaylistWithItemsSerializer(instance=playlist)
+        return Response(serializer.data)
+
     def get_queryset(self):
+        playlist_id = self.request.query_params.get('playlist_id')
         return PlaylistItem.objects.filter(
             playlist__creator=self.request.user,
-            playlist__playlist_id=self.request.query_params.get('playlist_id')
-        )
+            playlist__playlist_id=playlist_id
+        ) if self.request.user.is_authenticated else PlaylistItem.objects.filter(playlist__playlist_id=playlist_id)
 
     def perform_create(self, serializer):
         playlist = Playlists.objects.get(

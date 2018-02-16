@@ -64,6 +64,15 @@ class PlaylistsSerializer(serializers.ModelSerializer):
         fields = ('playlist_id', 'name', 'items_count')
 
 
+class PlaylistWithItemsSerializer(PlaylistsSerializer):
+
+    items = PlaylistItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Playlists
+        fields = PlaylistsSerializer.Meta.fields + ('items',)
+
+
 class ElasticsearchItem(serializers.Serializer):
     """Serializer for elastic search document"""
     title = serializers.CharField()
