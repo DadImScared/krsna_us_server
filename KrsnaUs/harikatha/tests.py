@@ -119,6 +119,16 @@ class TestPlaylists(BaseTestCase):
             self.user.username
         )
 
+    def test_user_can_update_playlist(self):
+        new_name = 'new name'
+        response = self.client.patch(
+            reverse('playlists-detail', args=(self.playlist.playlist_id,)),
+            {"name": new_name}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], new_name)
+        self.assertEqual(response.data['playlist_id'], str(self.playlist.playlist_id))
+
     def test_user_can_retrieve_playlist(self):
         response = self.client.get(reverse('playlists-detail', args=(self.playlist.playlist_id,)))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -129,14 +139,14 @@ class TestPlaylists(BaseTestCase):
         all_playlists = Playlists.objects.all()
         response = self.client.get(reverse('playlists-all-playlists'))
         self.assertEqual(all_playlists.count(), response.data['count'])
-        self.assertEqual(str(all_playlists[0].playlist_id), response.data['results'][0]['playlist_id'])
+        self.assertEqual(response.data['results'][0]['playlist_id'], str(all_playlists[0].playlist_id))
 
     def test_un_authenticated_user_can_view_all_playlists(self):
         self.client.logout()
         all_playlists = Playlists.objects.all()
         response = self.client.get(reverse('playlists-all-playlists'))
         self.assertEqual(all_playlists.count(), response.data['count'])
-        self.assertEqual(str(all_playlists[0].playlist_id), response.data['results'][0]['playlist_id'])
+        self.assertEqual(response.data['results'][0]['playlist_id'], str(all_playlists[0].playlist_id))
 
     def test_un_authenticated_user_can_view_playlist_detail(self):
         self.client.logout()
@@ -183,7 +193,7 @@ class TestPlaylistItems(BaseTestCase):
         playlist = self.user.playlists.all()[0]
         item = playlist.items.last()
         response = self.client.patch(
-            url_with_query_string(reverse('items-detail', args=(item.item_id,)), {'playlist_id': playlist.playlist_id}),
+            reverse('items-detail', args=(item.item_id,)),
             {"new_order": 0}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -245,3 +255,47 @@ class TestPlaylistItems(BaseTestCase):
         self.assertEqual(
             [playlist_item.item_order for playlist_item in self.playlist.items.all()], [_ for _ in range(10)]
         )
+
+
+class TestUserCantWriteOrDeleteOthersPlaylistOrItems(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.other_user = factories.UserFactory()
+        self.other_playlist = self.other_user.playlists.first()
+
+    def assertForbidden(self, response):
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthorized_user_can_not_delete_playlist(self):
+        response = self.client.delete(reverse('playlists-detail', args=(self.other_playlist.playlist_id,)))
+        self.assertForbidden(response)
+
+    def test_unauthorized_user_can_not_edit_playlist(self):
+        response = self.client.patch(
+            reverse('playlists-detail', args=(self.other_playlist.playlist_id,)),
+            {"name": "changed"}
+        )
+        self.assertForbidden(response)
+
+    def test_unauthorized_user_can_not_create_playlist_item(self):
+        collection_item = factories.HarikathaCollectionFactory()
+        response = self.client.post(
+            url_with_query_string(reverse('items-list'), {'playlist_id': self.other_playlist.playlist_id}),
+            {"collection_item": collection_item.pk}
+        )
+        self.assertForbidden(response)
+
+    def test_unauthorized_user_can_not_update_playlist_item(self):
+        item = self.other_playlist.items.first()
+        new_order = 2
+        response = self.client.patch(
+            reverse('items-detail', args=(item.item_id,)),
+            {"new_order": new_order}
+        )
+        self.assertForbidden(response)
+
+    def test_unauthorized_user_can_not_delete_playlist_item(self):
+        item = self.other_playlist.items.first()
+        response = self.client.delete(reverse('items-detail', args=(item.item_id,)))
+        self.assertForbidden(response)

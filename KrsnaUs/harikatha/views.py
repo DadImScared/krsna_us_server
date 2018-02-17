@@ -61,13 +61,13 @@ class AccountConfirm(APIView):
 class PlaylistsViewSet(viewsets.ModelViewSet):
     serializer_class = PlaylistsSerializer
     lookup_field = 'playlist_id'
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, CanWriteOrDeletePlaylist)
 
     def get_queryset(self):
         """Returns all Playlist objects if user is not authenticated else Playlist objects created by user"""
         if not self.request.user.is_authenticated and self.action == 'list':
             return []
-        if self.request.user.is_authenticated:
+        elif self.request.user.is_authenticated and self.action == 'list':
             return Playlists.objects.filter(creator=self.request.user)
         return Playlists.objects.all()
 
@@ -86,6 +86,7 @@ class PlaylistsViewSet(viewsets.ModelViewSet):
 
 
 class PlaylistItemsViewSet(viewsets.ModelViewSet):
+    queryset = PlaylistItem.objects.all()
     serializer_class = PlaylistItemSerializer
     lookup_field = 'item_id'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, CanWriteOrDeletePlaylistItem)
@@ -100,15 +101,6 @@ class PlaylistItemsViewSet(viewsets.ModelViewSet):
         serializer = PlaylistWithItemsSerializer(instance=playlist)
         return Response(serializer.data)
 
-    def get_queryset(self):
-        if self.action != 'list':
-            return PlaylistItem.objects.all()
-        playlist_id = self.request.query_params.get('playlist_id')
-        return PlaylistItem.objects.filter(
-            playlist__creator=self.request.user,
-            playlist__playlist_id=playlist_id
-        ) if self.request.user.is_authenticated else PlaylistItem.objects.filter(playlist__playlist_id=playlist_id)
-
     def perform_create(self, serializer):
         playlist = Playlists.objects.get(
             creator=self.request.user,
@@ -117,10 +109,7 @@ class PlaylistItemsViewSet(viewsets.ModelViewSet):
         serializer.save(playlist=playlist, item_order=self.get_queryset().count())
 
     def partial_update(self, request, *args, **kwargs):
-        playlist = Playlists.objects.get(
-            creator=self.request.user,
-            playlist_id=self.request.query_params.get('playlist_id')
-        )
+        playlist = self.get_object().playlist
         serializer = self.get_serializer(self.get_object(), data=request.data, partial=True)
         serializer.is_valid()
         current_order = self.get_object().item_order
@@ -131,7 +120,9 @@ class PlaylistItemsViewSet(viewsets.ModelViewSet):
             items.update(item_order=F('item_order') + 1)
         else:
             queryset.filter(
-                item_order__gt=current_order, item_order__lte=new_order
+                playlist=playlist,
+                item_order__gt=current_order,
+                item_order__lte=new_order
             ).update(item_order=F('item_order') - 1)
         serializer.save()
         return Response(PlaylistItemSerializer(instance=self.get_object()).data)
