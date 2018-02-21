@@ -155,7 +155,7 @@ class TestPlaylists(BaseTestCase):
         self.assertEqual(response.data['playlist_id'], str(self.playlist.playlist_id))
 
     def test_has_item_endpoint(self):
-        """has_item_endpoint should return playlist with field hasItem equal to True or False"""
+        """has_item_endpoint should return playlist with field hasItem equal to item_id or False"""
         item = factories.HarikathaCollectionFactory()
         second_playlist = self.user.playlists.all()[1]
         self.playlist.items.add(
@@ -169,8 +169,10 @@ class TestPlaylists(BaseTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data)
+        self.assertEqual(response.data[0]['hasItem'], self.playlist.items.last().item_id)
         self.assertTrue(response.data[0]['hasItem'])
         self.assertTrue(response.data[1]['hasItem'])
+        self.assertEqual(response.data[1]['hasItem'], second_playlist.items.last().item_id)
         for playlist in response.data[2:]:
             self.assertFalse(playlist['hasItem'])
 

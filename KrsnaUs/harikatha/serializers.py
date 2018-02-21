@@ -76,11 +76,9 @@ class PlaylistsHasItemSerializer(PlaylistsSerializer):
         """Return True if playlist has item else False"""
         item_id = self.context['item_id']
         try:
-            obj.items.get(collection_item__item_id=item_id)
+            return obj.items.get(collection_item__item_id=item_id).item_id
         except PlaylistItem.DoesNotExist:
             return False
-        else:
-            return True
 
 
 class PlaylistWithItemsSerializer(PlaylistsSerializer):
