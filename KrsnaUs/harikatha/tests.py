@@ -205,6 +205,7 @@ class TestPlaylistItems(BaseTestCase):
         )
         new_item_count = self.playlist.items.count()
         self.assertNotEqual(item_count, new_item_count)
+        self.assertEqual(response.data['item_order'], playlist.items.count() - 1)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['item_id'], str(playlist.items.last().item_id))
         self.assertEqual(response.data['title'], collection_item.title)

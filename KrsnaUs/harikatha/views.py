@@ -114,7 +114,7 @@ class PlaylistItemsViewSet(viewsets.ModelViewSet):
             creator=self.request.user,
             playlist_id=self.request.query_params.get('playlist_id')
         )
-        serializer.save(playlist=playlist, item_order=self.get_queryset().count())
+        serializer.save(playlist=playlist, item_order=PlaylistItem.objects.filter(playlist=playlist).count())
 
     def partial_update(self, request, *args, **kwargs):
         playlist = self.get_object().playlist
