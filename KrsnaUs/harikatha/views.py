@@ -3,7 +3,7 @@ import requests
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from django.db.models import F
-from rest_framework import generics, permissions, mixins, viewsets
+from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import list_route
 from rest_framework.views import APIView, Response
 from rest_auth.registration.views import SocialLoginView
@@ -16,7 +16,8 @@ from .serializers import (
     PlaylistsSerializer,
     PlaylistItemSerializer,
     PlaylistItemUpdateSerializer,
-    PlaylistWithItemsSerializer
+    PlaylistWithItemsSerializer,
+    PlaylistsHasItemSerializer
 )
 from .search import HarikathaIndex
 from .utils import PaginatedQuery
@@ -82,6 +83,13 @@ class PlaylistsViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(all_playlists, many=True)
+        return Response(serializer.data)
+
+    @list_route(permission_classes=[permissions.IsAuthenticated])
+    def has_item(self, request):
+        item_id = request.query_params.get('item_id', None)
+        playlists = Playlists.objects.filter(creator=request.user)
+        serializer = PlaylistsHasItemSerializer(playlists, many=True, context={'item_id': item_id})
         return Response(serializer.data)
 
 

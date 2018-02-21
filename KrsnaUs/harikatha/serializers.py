@@ -64,6 +64,25 @@ class PlaylistsSerializer(serializers.ModelSerializer):
         fields = ('playlist_id', 'name', 'items_count')
 
 
+class PlaylistsHasItemSerializer(PlaylistsSerializer):
+
+    hasItem = serializers.SerializerMethodField(method_name='get_has_item')
+
+    class Meta:
+        model = Playlists
+        fields = PlaylistsSerializer.Meta.fields + ('hasItem',)
+
+    def get_has_item(self, obj):
+        """Return True if playlist has item else False"""
+        item_id = self.context['item_id']
+        try:
+            obj.items.get(collection_item__item_id=item_id)
+        except PlaylistItem.DoesNotExist:
+            return False
+        else:
+            return True
+
+
 class PlaylistWithItemsSerializer(PlaylistsSerializer):
 
     items = PlaylistItemSerializer(many=True, read_only=True)

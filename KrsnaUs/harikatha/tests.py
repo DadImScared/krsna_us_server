@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.reverse import reverse
 
-from .models import HarikathaIndex, Playlists, PlaylistItem
+from .models import HarikathaIndex, Playlists
 from .utils import PaginatedQuery
 from . import factories
 
@@ -153,6 +153,26 @@ class TestPlaylists(BaseTestCase):
         response = self.client.get(reverse('playlists-detail', args=(self.playlist.playlist_id,)))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['playlist_id'], str(self.playlist.playlist_id))
+
+    def test_has_item_endpoint(self):
+        """has_item_endpoint should return playlist with field hasItem equal to True or False"""
+        item = factories.HarikathaCollectionFactory()
+        second_playlist = self.user.playlists.all()[1]
+        self.playlist.items.add(
+            factories.PlaylistItemFactory.create(collection_item=item, playlist=self.playlist)
+        )
+        second_playlist.items.add(
+            factories.PlaylistItemFactory.create(collection_item=item, playlist=second_playlist)
+        )
+        response = self.client.get(
+            url_with_query_string(reverse('playlists-has-item'), {"item_id": item.item_id})
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data)
+        self.assertTrue(response.data[0]['hasItem'])
+        self.assertTrue(response.data[1]['hasItem'])
+        for playlist in response.data[2:]:
+            self.assertFalse(playlist['hasItem'])
 
 
 class TestPlaylistItems(BaseTestCase):
