@@ -201,7 +201,7 @@ class TestPlaylistItems(BaseTestCase):
         collection_item = factories.HarikathaCollectionFactory()
         response = self.client.post(
             url_with_query_string(reverse('items-list'), {'playlist_id': playlist.playlist_id}),
-            {"collection_item": collection_item.pk}
+            {"collection_item": collection_item.item_id}
         )
         new_item_count = self.playlist.items.count()
         self.assertNotEqual(item_count, new_item_count)
@@ -210,6 +210,20 @@ class TestPlaylistItems(BaseTestCase):
         self.assertEqual(response.data['title'], collection_item.title)
         self.assertEqual(response.data['link'], collection_item.link)
         self.assertEqual(response.data['category'], collection_item.category)
+
+    def test_user_can_not_create_duplicate_playlist_item(self):
+        playlist = self.user.playlists.all()[0]
+        collection_item = factories.HarikathaCollectionFactory()
+        response = self.client.post(
+            url_with_query_string(reverse('items-list'), {'playlist_id': playlist.playlist_id}),
+            {"collection_item": collection_item.item_id}
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response2 = self.client.post(
+            url_with_query_string(reverse('items-list'), {'playlist_id': playlist.playlist_id}),
+            {"collection_item": collection_item.item_id}
+        )
+        self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_user_can_move_playlist_item_up_playlist(self):
         playlist = self.user.playlists.all()[0]

@@ -92,3 +92,4 @@ class PlaylistItem(models.Model):
 
     class Meta:
         ordering = ['item_order']
+        unique_together = ('playlist', 'collection_item')

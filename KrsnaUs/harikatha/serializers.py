@@ -1,4 +1,5 @@
 
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from collections import OrderedDict
 
@@ -22,6 +23,7 @@ class PlaylistItemSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='collection_item.title', read_only=True)
     link = serializers.CharField(source='collection_item.link', read_only=True)
     category = serializers.CharField(source='collection_item.category', read_only=True)
+    collection_item = serializers.CharField(source='collection_item.item_id', write_only=True)
 
     class Meta:
         model = PlaylistItem
@@ -30,6 +32,22 @@ class PlaylistItemSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'collection_item': {'write_only': True}
         }
+
+    def validate_collection_item(self, value):
+        try:
+            PlaylistItem.objects.get(
+                playlist__playlist_id=self.context['request'].query_params.get('playlist_id'),
+                collection_item__item_id=value
+            )
+        except PlaylistItem.DoesNotExist:
+            return value
+        else:
+            raise serializers.ValidationError('Playlist has item already')
+
+    def create(self, validated_data):
+        collection_item = validated_data.pop('collection_item')
+        hk_item = get_object_or_404(HarikathaCollection, item_id=collection_item['item_id'])
+        return PlaylistItem.objects.create(collection_item=hk_item, **validated_data)
 
 
 class PlaylistItemUpdateSerializer(serializers.ModelSerializer):
