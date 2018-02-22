@@ -212,6 +212,15 @@ class TestPlaylistItems(BaseTestCase):
         self.assertEqual(response.data['link'], collection_item.link)
         self.assertEqual(response.data['category'], collection_item.category)
 
+    def test_user_can_delete_playlist_item(self):
+        item = self.items.all()[2]
+        response = self.client.delete(reverse('items-detail', args=(item.item_id,)))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(
+            [playlist_item.item_order for playlist_item in self.playlist.items.all()],
+            [_ for _ in range(self.playlist.items.count())]
+        )
+
     def test_user_can_not_create_duplicate_playlist_item(self):
         playlist = self.user.playlists.all()[0]
         collection_item = factories.HarikathaCollectionFactory()

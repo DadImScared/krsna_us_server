@@ -135,6 +135,17 @@ class PlaylistItemsViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(PlaylistItemSerializer(instance=self.get_object()).data)
 
+    def destroy(self, request, *args, **kwargs):
+        item_order = self.get_object().item_order
+        playlist = self.get_object().playlist
+        response = super().destroy(request, *args, **kwargs)
+        queryset = self.queryset
+        queryset.filter(
+            playlist=playlist,
+            item_order__gt=item_order
+        ).update(item_order=F('item_order') - 1)
+        return response
+
 
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
