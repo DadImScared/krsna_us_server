@@ -102,10 +102,17 @@ class PlaylistsHasItemSerializer(PlaylistsSerializer):
 class PlaylistWithItemsSerializer(PlaylistsSerializer):
 
     items = PlaylistItemSerializer(many=True, read_only=True)
+    isCreator = serializers.SerializerMethodField(method_name='is_creator')
 
     class Meta:
         model = Playlists
-        fields = PlaylistsSerializer.Meta.fields + ('items',)
+        fields = PlaylistsSerializer.Meta.fields + ('items', 'isCreator')
+
+    def is_creator(self, obj):
+        """Return True if user is creator of playlist else False"""
+        playlist = self.context['playlist']
+        user = self.context['request'].user
+        return True if user.is_authenticated and playlist.creator == user else False
 
 
 class ElasticsearchItem(serializers.Serializer):

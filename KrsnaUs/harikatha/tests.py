@@ -185,6 +185,29 @@ class TestPlaylistItems(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], self.playlist.name)
         self.assertEqual(response.data['items_count'], self.playlist.items.count())
+        self.assertTrue(response.data['isCreator'])
+
+    def test_un_authenticated_user_can_retrieve_playlist_items(self):
+        self.client.logout()
+        response = self.client.get(url_with_query_string(
+            reverse('items-list'), {'playlist_id': self.playlist.playlist_id}
+        ))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], self.playlist.name)
+        self.assertEqual(response.data['items_count'], self.playlist.items.count())
+        self.assertFalse(response.data['isCreator'])
+
+    def test_isCreator_is_false_when_user_is_not_creator(self):
+        self.client.logout()
+        other_user = factories.UserFactory()
+        self.client.force_authenticate(user=other_user)
+        response = self.client.get(url_with_query_string(
+            reverse('items-list'), {'playlist_id': self.playlist.playlist_id}
+        ))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], self.playlist.name)
+        self.assertEqual(response.data['items_count'], self.playlist.items.count())
+        self.assertFalse(response.data['isCreator'])
 
     def test_user_can_retrieve_playlist_item(self):
         item_id = self.items[0].item_id

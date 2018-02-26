@@ -106,7 +106,10 @@ class PlaylistItemsViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         playlist = Playlists.objects.get(playlist_id=request.query_params.get('playlist_id'))
-        serializer = PlaylistWithItemsSerializer(instance=playlist)
+        serializer = PlaylistWithItemsSerializer(
+            instance=playlist,
+            context={'playlist': playlist, 'request': request}
+        )
         return Response(serializer.data)
 
     def perform_create(self, serializer):
