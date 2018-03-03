@@ -117,8 +117,9 @@ class PlaylistWithItemsSerializer(PlaylistsSerializer):
 
 class ElasticsearchItem(serializers.Serializer):
     """Serializer for elastic search document"""
-    title = serializers.CharField()
-    highlightedTitle = serializers.SerializerMethodField(source='meta.highlight.title')
+    title = serializers.SerializerMethodField()
+    highlightedTitle = serializers.SerializerMethodField()
+    highlightedBody = serializers.SerializerMethodField()
     link = serializers.CharField()
     category = serializers.CharField()
     year = serializers.CharField()
@@ -127,7 +128,18 @@ class ElasticsearchItem(serializers.Serializer):
     language = serializers.CharField()
 
     def get_highlightedTitle(self, obj):
-        return obj.meta.highlight.title[0]
+        if 'title' in obj.meta.highlight:
+            return obj.meta.highlight['title'][0]
+        return None
+
+    def get_highlightedBody(self, obj):
+        if 'body' in obj.meta.highlight:
+            return obj.meta.highlight['body'][0]
+        return None
+
+    def get_title(self, obj):
+        # content of magazines/books have book_title instead of title
+        return obj.book_title if 'book_title' in obj else obj.title
 
     def to_representation(self, instance):
         """Remove null fields from serializer"""

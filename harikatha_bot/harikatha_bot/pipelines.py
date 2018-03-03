@@ -19,6 +19,16 @@ class HarikathaBotPipeline(object):
             raise DropItem("Duplicate item found {}".format(item))
         return item
 
+# removes all numbers underscores and .mp3/4
+pattern = r'[_\d]+|\s{0,}.mp[\d]+'
+
+
+class SongPipeline(object):
+    """removes numbers and underscores from song title"""
+    def process_item(self, item, spider):
+        item['title'] = re.sub(pattern, ' ', item['title']).strip()
+        return item
+
 
 class BhagavatPatrikaPipeline(object):
     """Adds year and issue to the HarikathaBotItem"""

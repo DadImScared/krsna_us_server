@@ -45,7 +45,7 @@ class HarikathaCollection(models.Model):
     directory = models.CharField(null=True, max_length=255)
 
     class Meta:
-        unique_together = (("title", "link", 'issue'),)
+        unique_together = (("title", "link", 'issue'), ('title', 'link'))
         ordering = ['category']
 
     def indexing(self):

@@ -33,13 +33,15 @@ CATEGORIES = ["book", "movie", "song", "harikatha",
 def get_query(categories, query):
     """Return elastic search query with filter if not all categories are in list else no filter"""
     if len(categories) == len(CATEGORIES) or len(categories) == 0:
-        return HarikathaIndex.search().query('match', title=query)
+        return HarikathaIndex.search().query('multi_match', query=query, fields=['title', 'body'])
     else:
-        return HarikathaIndex.search().filter('terms', category=[category for category in categories]).query('match', title=query)
+        return HarikathaIndex.search().filter(
+            'terms', category=[category for category in categories]
+        ).query('multi_match', query=query, fields=['title', 'body'])
 
 
 def add_suggestion(elastic_query, search_word):
-    """Add suggestions to elastic search query and return"""
+    """Add suggestions to elastic search query"""
     return elastic_query.suggest(
             'other_suggestions',
             search_word,
@@ -47,7 +49,27 @@ def add_suggestion(elastic_query, search_word):
                 'field': 'phrase_suggest',
                 "max_errors": 2,
             }
-        )
+        ).suggest(
+        'body_suggestions',
+        search_word,
+        phrase={
+            'field': 'body_suggest',
+            'max_errors': 2
+        }
+    )
+
+
+def combine_suggestions(title_suggestions, body_suggestions):
+    """Combines and removes duplicate suggestions from title suggestions and body_suggestions and sorts by score
+
+    :param list title_suggestions: List of elastic search suggestions
+    :param list body_suggestions:  List of elastic search suggestions
+    :return list: List of combined unique suggestions sorted by score
+    """
+    return {
+        suggestion['text']: suggestion for suggestion in
+        sorted([*title_suggestions, *body_suggestions], key=lambda obj: obj['score'], reverse=True)
+    }.values()
 
 
 class AccountConfirm(APIView):
@@ -199,11 +221,17 @@ class HariKathaCollectionSearch(APIView):
         search_query = paged_query.query
         search_query = add_suggestion(search_query, query)
         search_query = search_query.highlight('title')
+        search_query = search_query.highlight('body')
         results = search_query.execute()
         response = {
             "nextPage": paged_query.next_page,
             "results": ElasticsearchItem(results.hits, many=True).data,
-            "suggestions": Suggestion(results.suggest.other_suggestions[0]['options'], many=True).data
+            "suggestions": Suggestion(
+                combine_suggestions(
+                    results.suggest.other_suggestions[0]['options'],
+                    results.suggest.body_suggestions[0]['options']
+                ), many=True
+            ).data
         }
         return Response(response)
 
