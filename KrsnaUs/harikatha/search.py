@@ -7,7 +7,7 @@ from . import models
 
 connections.create_connection()
 
-es = Elasticsearch()
+# es = Elasticsearch()
 # es.indices.close(index='harikatha-index')
 # es.indices.delete(index='harikatha-index')
 
