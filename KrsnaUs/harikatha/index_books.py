@@ -41,7 +41,7 @@ def index_book_content():
             pages = re.split(page_split, book_file)
             for i, page in enumerate(pages):
                 search.HarikathaIndex(
-                    book_title=book.title,
+                    content_title=book.title,
                     link=book.link,
                     language=book.language,
                     page=i+1,

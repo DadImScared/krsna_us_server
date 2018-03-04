@@ -139,7 +139,7 @@ class ElasticsearchItem(serializers.Serializer):
 
     def get_title(self, obj):
         # content of magazines/books have book_title instead of title
-        return obj.book_title if 'book_title' in obj else obj.title
+        return obj.content_title if 'content_title' in obj else obj.title
 
     def to_representation(self, instance):
         """Remove null fields from serializer"""

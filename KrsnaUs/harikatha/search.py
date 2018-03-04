@@ -46,7 +46,7 @@ class HarikathaIndex(DocType):
     page = Text()
     timestamp = Text()
     item_id = Text()
-    book_title = Text()
+    content_title = Text()
 
     class Meta:
         index = 'harikatha-index'
