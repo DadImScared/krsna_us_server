@@ -4,7 +4,7 @@ import os
 import re
 import sys
 from elasticsearch_dsl.connections import connections
-sys.path.append('../')
+sys.path.append('..')
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "KrsnaUs.settings")
 django.setup()
 

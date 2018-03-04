@@ -126,8 +126,10 @@ class ElasticsearchItem(serializers.Serializer):
     issue = serializers.CharField()
     directory = serializers.CharField()
     language = serializers.CharField()
+    item_id = serializers.CharField()
 
     def get_highlightedTitle(self, obj):
+        print(obj.meta.highlight)
         if 'title' in obj.meta.highlight:
             return obj.meta.highlight['title'][0]
         return None
