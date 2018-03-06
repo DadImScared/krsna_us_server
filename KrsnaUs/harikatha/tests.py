@@ -382,5 +382,4 @@ class TestHarikathaCollectionAdmin(BaseTestCase):
         """category field should have choices based on user permissions"""
         self.add_permission(self.user, 'harikatha')
         form = HariKathaCollectionForm(current_user=self.user)
-        # print(form.choices)
         self.assertEqual(form.fields['category'].choices[0][0], 'harikatha')
