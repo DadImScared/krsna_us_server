@@ -6,7 +6,11 @@ from .models import User, HarikathaCollection
 
 # Register your models here.
 
-admin.site.register(User, UserAdmin)
+
+class CustomUserAdmin(UserAdmin):
+    list_display_links = ('username', 'first_name')
+
+admin.site.register(User, CustomUserAdmin)
 
 requiredInputs = {
     'bhagavatpatrika': ['year', 'issue'],
