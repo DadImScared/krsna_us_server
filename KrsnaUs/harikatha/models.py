@@ -48,14 +48,14 @@ class HarikathaCollection(models.Model):
         unique_together = (("title", "link", 'issue'), ('title', 'link'))
         ordering = ['category']
         permissions = (
-            ('write_books', 'Write books'),
-            ('write_movies', 'Write movies'),
+            ('write_book', 'Write books'),
+            ('write_movie', 'Write movies'),
             ('write_bhagavatpatrika', 'Write Bhagavat Patrika'),
             ('write_harmonistmonthly', 'Write Harmonist Monthly'),
             ('write_harmonistmagazine', 'Write Harmonist Magazine'),
             ('write_harikatha', 'Write Hari Katha'),
-            ('write_songs', 'Write songs'),
-            ('write_lectures', 'Write lectures')
+            ('write_song', 'Write songs'),
+            ('write_lecture', 'Write lectures')
         )
 
     def indexing(self):
