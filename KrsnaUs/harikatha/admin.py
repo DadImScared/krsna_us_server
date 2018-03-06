@@ -40,6 +40,15 @@ def can_write(user, obj=None):
     return False
 
 
+def get_categories(user):
+    """Return list of categories based on permissions like write_book, write_song"""
+    return [
+            permission.codename.split('_')[-1] for permission in user.user_permissions.filter(
+                codename__startswith='write'
+            )
+        ]
+
+
 class HariKathaCollectionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         # used if form is created separate from admin view i.e testing.
@@ -81,15 +90,21 @@ class HariKathaCollectionAdmin(admin.ModelAdmin):
     exclude = ('indexed',)
     form = HariKathaCollectionForm
 
+    def get_list_display(self, request):
+        base_display = ('title', 'link', 'category')
+        if request.user.is_superuser:
+            base_display += ('directory', 'issue', 'year', 'language')
+            return base_display
+        for category in get_categories(request.user):
+            if category in requiredInputs:
+                for field in requiredInputs[category]:
+                    base_display += (field,)
+        return base_display
+
     def get_queryset(self, request):
         if request.user.is_superuser:
             return HarikathaCollection.objects.all()
-        # gets all categories based on permissions like write_book, write_song
-        categories = [
-            permission.codename.split('_')[-1] for permission in request.user.user_permissions.filter(
-                codename__startswith='write'
-            )
-        ]
+        categories = get_categories(request.user)
         return HarikathaCollection.objects.filter(category__in=categories)
 
     def get_readonly_fields(self, request, obj=None):
