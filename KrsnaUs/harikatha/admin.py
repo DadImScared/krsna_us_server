@@ -1,3 +1,4 @@
+
 from django.contrib import admin
 from django import forms
 from django.contrib.auth.admin import UserAdmin
@@ -79,6 +80,17 @@ class HariKathaCollectionForm(forms.ModelForm):
 class HariKathaCollectionAdmin(admin.ModelAdmin):
     exclude = ('indexed',)
     form = HariKathaCollectionForm
+
+    def get_queryset(self, request):
+        if request.user.is_superuser:
+            return HarikathaCollection.objects.all()
+        # gets all categories based on permissions like write_book, write_song
+        categories = [
+            permission.codename.split('_')[-1] for permission in request.user.user_permissions.filter(
+                codename__startswith='write'
+            )
+        ]
+        return HarikathaCollection.objects.filter(category__in=categories)
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
