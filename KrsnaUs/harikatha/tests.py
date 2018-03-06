@@ -1,5 +1,6 @@
 
 import inspect
+from django.contrib.auth.models import Permission
 from django.utils.http import urlencode
 from django.test import TestCase
 from django.contrib.auth import get_user_model
@@ -8,7 +9,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.reverse import reverse
 
-from .models import HarikathaIndex, Playlists
+from .admin import HariKathaCollectionForm
+from .models import HarikathaIndex, Playlists, HarikathaCollection
 from .utils import PaginatedQuery
 from . import factories
 
@@ -368,3 +370,17 @@ class TestUserCantWriteOrDeleteOthersPlaylistOrItems(BaseTestCase):
         item = self.other_playlist.items.first()
         response = self.client.delete(reverse('items-detail', args=(item.item_id,)))
         self.assertForbidden(response)
+
+
+class TestHarikathaCollectionAdmin(BaseTestCase):
+
+    def add_permission(self, user, category):
+        permission = Permission.objects.get(codename='write_{}'.format(category))
+        user.user_permissions.add(permission)
+
+    def test_admin_form_has_correct_choices(self):
+        """category field should have choices based on user permissions"""
+        self.add_permission(self.user, 'harikatha')
+        form = HariKathaCollectionForm(current_user=self.user)
+        # print(form.choices)
+        self.assertEqual(form.fields['category'].choices[0][0], 'harikatha')

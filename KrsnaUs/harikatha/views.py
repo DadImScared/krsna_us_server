@@ -221,7 +221,7 @@ class HariKathaCollectionSearch(APIView):
         search_query = paged_query.query
         search_query = add_suggestion(search_query, query)
         search_query = search_query.highlight('title')
-        search_query = search_query.highlight('body')
+        search_query = search_query.highlight('body', fragment_size=200)
         results = search_query.execute()
         response = {
             "nextPage": paged_query.next_page,

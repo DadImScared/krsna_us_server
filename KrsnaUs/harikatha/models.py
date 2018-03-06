@@ -36,17 +36,27 @@ class HarikathaCollection(models.Model):
     #: indexed. Used to track if an items content has been indexed for searching
     indexed = models.BooleanField(default=False)
     #: language of book. required when choice is book
-    language = models.CharField(null=True, max_length=255)
+    language = models.CharField(null=True, blank=True, max_length=255)
     #: year. required when choice is bhagavatpatrika
-    year = models.CharField(null=True, max_length=255)
+    year = models.CharField(null=True, blank=True, max_length=255)
     #: issue. required when choice is bhagavatpatrika
-    issue = models.CharField(null=True, max_length=255)
+    issue = models.CharField(null=True, blank=True, max_length=255)
     #: directory. required when choice is song general used when at highest directory
-    directory = models.CharField(null=True, max_length=255)
+    directory = models.CharField(null=True, blank=True, max_length=255)
 
     class Meta:
         unique_together = (("title", "link", 'issue'), ('title', 'link'))
         ordering = ['category']
+        permissions = (
+            ('write_books', 'Write books'),
+            ('write_movies', 'Write movies'),
+            ('write_bhagavatpatrika', 'Write Bhagavat Patrika'),
+            ('write_harmonistmonthly', 'Write Harmonist Monthly'),
+            ('write_harmonistmagazine', 'Write Harmonist Magazine'),
+            ('write_harikatha', 'Write Hari Katha'),
+            ('write_songs', 'Write songs'),
+            ('write_lectures', 'Write lectures')
+        )
 
     def indexing(self):
         """Index the record to elastic search"""

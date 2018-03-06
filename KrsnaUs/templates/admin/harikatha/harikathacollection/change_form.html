@@ -1,0 +1,55 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block admin_change_form_document_ready %}
+  {{ block.super }}
+  <script>
+    function getEle(name) {
+      return document.querySelector('.field-' + name);
+{#      return document.querySelector('input[name="' + name + '"]');#}
+    }
+    const extraFields = {
+      language: getEle('language'),
+      directory: getEle('directory'),
+      year: getEle('year'),
+      issue: getEle('issue')
+    };
+    const categories = {
+      bhagavatpatrika: ['year', 'issue'],
+      book: ['language'],
+      song: ['directory'],
+      lecture: ['directory']
+    };
+    function hideExtraFields() {
+      Object.keys(extraFields).forEach(function(item) {
+        if (!extraFields[item].classList.contains('errors')) {
+          extraFields[item].style.display = 'none'
+        }
+      })
+    }
+    function toggleExtraFields(value) {
+      hideExtraFields();
+      if (categories[value]) {
+        // do stuff to hide certain fields
+        categories[value].forEach(function(item) {
+          extraFields[item].style.display = 'block';
+        })
+      }
+    }
+    hideExtraFields();
+    const selectField = document.querySelector("select[name='category']");
+    if (selectField) { // select field only exists if a new item is being added
+      toggleExtraFields(selectField.value);
+      selectField.addEventListener('change', function(e) {
+        toggleExtraFields(e.target.value);
+      });
+    }
+    else {
+      // the category instead exists in a div tag
+      const category = getEle('category .readonly').textContent;
+      toggleExtraFields(category.split(' ').join('').toLowerCase());
+    }
+  </script>
+{% endblock %}
+
+}

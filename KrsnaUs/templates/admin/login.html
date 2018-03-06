@@ -1,0 +1,10 @@
+{% extends 'admin/login.html' %}
+{% load socialaccount %}
+{% providers_media_js %}
+
+{% block content %}
+  {{ block.super }}
+  <div>
+    <a href="{% provider_login_url "facebook" %}">Login with Facebook</a>
+  </div>
+{% endblock %}
