@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from rest_framework.reverse import reverse
 
 from .admin import HariKathaCollectionForm
-from .models import HarikathaIndex, Playlists, HarikathaCollection
+from .models import HarikathaIndex, Playlists
 from .utils import PaginatedQuery
 from . import factories
 

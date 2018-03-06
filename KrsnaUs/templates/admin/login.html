@@ -4,7 +4,9 @@
 
 {% block content %}
   {{ block.super }}
-  <div>
+  <div style="display: flex; justify-content: space-around; padding-top: 15px; flex-wrap: wrap; width: 100%">
     <a href="{% provider_login_url "facebook" %}">Login with Facebook</a>
+  {#  provider_login_url with google doesn't seem to work so have to custom url   #}
+    <a href="/account/google/login?next=/admin/">Login with Google</a>
   </div>
 {% endblock %}
