@@ -1,4 +1,5 @@
 
+from allauth.account.models import EmailAddress
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from collections import OrderedDict
@@ -97,6 +98,16 @@ class PlaylistsHasItemSerializer(PlaylistsSerializer):
             return obj.items.get(collection_item__item_id=item_id).item_id
         except PlaylistItem.DoesNotExist:
             return False
+
+
+class ReSendEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+    def validate_email(self, value):
+        try:
+            return EmailAddress.objects.get(email=value, verified=False)
+        except EmailAddress.DoesNotExist:
+            raise serializers.ValidationError('Email does not exist')
 
 
 class PlaylistWithItemsSerializer(PlaylistsSerializer):

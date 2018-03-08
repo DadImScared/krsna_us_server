@@ -1,5 +1,7 @@
 
 import requests
+from allauth.account.models import EmailAddress
+from allauth.account.utils import send_email_confirmation
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from django.db.models import F
@@ -17,7 +19,8 @@ from .serializers import (
     PlaylistItemSerializer,
     PlaylistItemUpdateSerializer,
     PlaylistWithItemsSerializer,
-    PlaylistsHasItemSerializer
+    PlaylistsHasItemSerializer,
+    ReSendEmailSerializer
 )
 from .search import HarikathaIndex
 from .utils import PaginatedQuery
@@ -70,6 +73,17 @@ def combine_suggestions(title_suggestions, body_suggestions):
         suggestion['text']: suggestion for suggestion in
         sorted([*title_suggestions, *body_suggestions], key=lambda obj: obj['score'], reverse=True)
     }.values()
+
+
+class ReSendEmailConfirm(APIView):
+
+    def post(self, request, *args, **kwargs):
+        serializer = ReSendEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        user = email.user
+        send_email_confirmation(request, user)
+        return Response({"message": "Email confirmation sent"})
 
 
 class AccountConfirm(APIView):

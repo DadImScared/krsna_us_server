@@ -7,7 +7,8 @@ from .views import (
     HariKathaCollectionAutoComplete,
     HariKathaCategoryView,
     PlaylistsViewSet,
-    PlaylistItemsViewSet
+    PlaylistItemsViewSet,
+    ReSendEmailConfirm
 )
 
 router = routers.SimpleRouter()
@@ -18,5 +19,6 @@ urlpatterns = [
     url(r'^items/(?P<category>[a-zA-Z]+)/$', HariKathaCategoryView.as_view(), name='items'),
     url(r'^search/(?P<query>[\w. \'-_]+)/$', HariKathaCollectionSearch.as_view(), name="search-items"),
     url(r'^completeme/(?P<query>[\w. \'-_]+)/$', HariKathaCollectionAutoComplete.as_view(), name="auto-complete"),
+    url(r'^resend_email/', ReSendEmailConfirm.as_view(), name='resend_email'),
     url(r'^', include(router.urls))
 ]

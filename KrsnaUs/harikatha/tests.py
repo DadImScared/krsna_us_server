@@ -1,5 +1,6 @@
 
 import inspect
+from django.core import mail
 from django.contrib.auth.models import Permission
 from django.utils.http import urlencode
 from django.test import TestCase
@@ -370,6 +371,28 @@ class TestUserCantWriteOrDeleteOthersPlaylistOrItems(BaseTestCase):
         item = self.other_playlist.items.first()
         response = self.client.delete(reverse('items-detail', args=(item.item_id,)))
         self.assertForbidden(response)
+
+
+class TestReSendEmailView(BaseTestCase):
+
+    def test_reset_email(self):
+        email = EmailAddress.objects.create(email=self.user.email, user=self.user, primary=True)
+        response = self.client.post(
+            '/api/v1/resend_email/',
+            data={"email": self.user.email}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to[0], email.email)
+        self.assertEqual(response.data['message'], 'Email confirmation sent')
+
+    def test_invalid_reset_email(self):
+        response = self.client.post(
+            '/api/v1/resend_email/',
+            data={"email": "awdawd@awdawd.com"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['email'][0], 'Email does not exist')
 
 
 class TestHarikathaCollectionAdmin(BaseTestCase):
