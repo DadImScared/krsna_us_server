@@ -33,6 +33,8 @@ AUTH_USER_MODEL = 'harikatha.User'
 
 # Application definition
 
+CLIENT_URL = config.CLIENT_URL
+
 DEV_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 PROD_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = DEV_BACKEND if DEBUG else PROD_BACKEND

@@ -5,6 +5,8 @@ from allauth.account.utils import send_email_confirmation
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from django.db.models import F
+from django.http import HttpResponseRedirect
+from django.conf import settings
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import list_route
 from rest_framework.views import APIView, Response
@@ -92,7 +94,7 @@ class AccountConfirm(APIView):
     def get(self, request, key, *args, **kwargs):
         """Make post request to verify_email endpoint"""
         r = requests.post('http://127.0.0.1:8000/rest-auth/registration/verify-email/', data={'key': key})
-        return Response()
+        return HttpResponseRedirect(settings.CLIENT_URL)
 
 
 class PlaylistsViewSet(viewsets.ModelViewSet):
