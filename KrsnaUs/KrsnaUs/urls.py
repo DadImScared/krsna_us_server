@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from harikatha.views import AccountConfirm, GoogleLogin, FacebookLogin
 
@@ -31,3 +32,5 @@ urlpatterns = [
     url(r'^rest-auth/google/$', GoogleLogin.as_view(), name='google_login'),
     url(r'^rest-auth/facebook/$', FacebookLogin.as_view(), name='fb_login')
 ]
+
+urlpatterns += staticfiles_urlpatterns()
