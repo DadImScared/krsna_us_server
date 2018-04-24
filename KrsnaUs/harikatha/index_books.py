@@ -13,7 +13,6 @@ from harikatha import models, search
 dir_path = os.path.dirname(os.path.realpath(__file__))
 book_dir = '{0}{1}allbooks{1}'.format(dir_path, os.path.sep)
 files = os.listdir(book_dir)
-connections.create_connection()
 
 
 def get_book(path):

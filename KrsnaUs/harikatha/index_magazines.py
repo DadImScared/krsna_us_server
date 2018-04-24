@@ -59,6 +59,7 @@ def index_harmonist_magazine():
         magazine.indexed = True
         magazine.save()
 
+
 if __name__ == '__main__':
-    # index_harikatha()
+    index_harikatha()
     index_harmonist_magazine()

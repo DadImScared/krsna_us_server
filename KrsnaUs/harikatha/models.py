@@ -27,10 +27,10 @@ class HarikathaCollection(models.Model):
     )
     item_id = models.UUIDField(default=uuid.uuid4, unique=True)
     #: title of collection item. required
-    title = models.CharField(max_length=255)
+    title = models.TextField()
     #: link to collection item. required
     #: various sources: youtube, soundcloud, purebhakti.com, etc
-    link = models.URLField()
+    link = models.URLField(max_length=500)
     #: One of CATEGORY_CHOICES. required
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=255)
     #: indexed. Used to track if an items content has been indexed for searching
@@ -76,6 +76,7 @@ class HarikathaCollection(models.Model):
             year=self.year,
             issue=self.issue,
             directory=self.directory,
+            item_id=self.item_id
         )
         obj.save()
         return obj.to_dict(include_meta=True)

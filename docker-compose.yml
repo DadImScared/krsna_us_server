@@ -7,23 +7,42 @@ services:
       - "8000:8000"
     volumes:
       - ./config/nginx:/etc/nginx/conf.d
-      - .:/code
+      - .:/KrsnaUs
       - ./static:/static
     depends_on:
       - krsnaus
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+    volumes: # Persist ES data in seperate "esdata" volume
+      - ./esdata
+    env_file:
+      - ./.env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
   db:
     image: postgres
-    environment:
-      - POSTGRES_DB=krsna_us
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=swordfish
+    env_file:
+      - ./.env
   krsnaus:
     build: .
     command: ./start.sh
+    env_file:
+      - ./.env
+    environment:
+      - PYTHONUNBUFFERED=0
     volumes:
-      - .:/code
+      - .:/KrsnaUs
       - ./static:/static
     expose:
       - "8000"
     depends_on:
       - db
+      - elasticsearch

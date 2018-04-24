@@ -12,20 +12,22 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
-import config
+try:
+    import config
+except ImportError:
+    pass
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config.SECRET_KEY
+SECRET_KEY = os.getenv('SECRET_KEY', config.SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config.DEBUG
+DEBUG = os.getenv('DEBUG', config.DEBUG)
 
 ALLOWED_HOSTS = ['krsnaus']
 
@@ -33,15 +35,15 @@ AUTH_USER_MODEL = 'harikatha.User'
 
 # Application definition
 
-CLIENT_URL = config.CLIENT_URL
+CLIENT_URL = os.getenv('CLIENT_URL', config.CLIENT_URL)
 
 DEV_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 PROD_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = DEV_BACKEND if DEBUG else PROD_BACKEND
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = config.EMAIL_USER
-EMAIL_HOST_PASSWORD = config.EMAIL_PASS
+EMAIL_HOST_USER = os.getenv('EMAIL_USER', config.EMAIL_USER)
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS', config.EMAIL_PASS)
 EMAIL_USE_TLS = True
 EMAIL_SSL = False
 
@@ -131,11 +133,11 @@ WSGI_APPLICATION = 'KrsnaUs.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config.PSG_NAME,
-        'USER': config.PSG_USER,
-        'PASSWORD': config.PSG_PASS,
-        'HOST': config.PSG_HOST,
-        'PORT': config.PSG_PORT
+        'NAME': os.getenv('POSTGRES_DB', config.POSTGRES_DB),
+        'USER': os.getenv('POSTGRES_USER', config.POSTGRES_USER),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', config.POSTGRES_PASSWORD),
+        'HOST': os.getenv('PSG_HOST', config.PSG_HOST),
+        'PORT': os.getenv('PSG_PORT', config.PSG_PORT)
     }
 }
 

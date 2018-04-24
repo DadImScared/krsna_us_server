@@ -1,11 +1,21 @@
 
+import os
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import DocType, Date, Text, Completion, analyzer, token_filter
 from . import models
 
-connections.create_connection()
+
+def get_connection_info():
+    return 'http://{}:{}@elasticsearch/'.format(
+        os.getenv('ES_NAME', 'elastic'), os.getenv('ELASTIC_PASSWORD', 'changeme')
+    )
+
+
+connections.create_connection(
+    hosts=[get_connection_info()]
+)
 
 # es = Elasticsearch()
 # es.indices.close(index='harikatha-index')
@@ -53,8 +63,8 @@ class HarikathaIndex(DocType):
 
 
 def bulk_indexing():
-    # HarikathaIndex.init()
-    es = Elasticsearch()
+    HarikathaIndex.init()
+    es = Elasticsearch(hosts=[get_connection_info()])
     bulk(client=es, actions=(item.indexing() for item in models.HarikathaCollection.objects.all().iterator()))
 
 
