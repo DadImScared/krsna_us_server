@@ -11,11 +11,25 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+from types import SimpleNamespace
 
 try:
     import config
 except ImportError:
-    pass
+    config = SimpleNamespace(
+        SECRET_KEY='default_key',
+        POSTGRES_DB='default_db',
+        POSTGRES_USER='postgres',
+        POSTGRES_PASSWORD='password',
+        PSG_HOST='localhost',
+        PSG_PORT=5432,
+        ES_NAME='elastic',
+        ELASTIC_PASSWORD='password',
+        DEBUG=True,
+        EMAIL_USER='default_email',
+        EMAIL_PASS='password',
+        CLIENT_URL='http://localhost:3000'
+    )
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
