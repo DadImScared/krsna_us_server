@@ -43,7 +43,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', config.SECRET_KEY)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', config.DEBUG)
 
-ALLOWED_HOSTS = ['krsnaus']
+ALLOWED_HOSTS = ['localhost', '.gvparchives.com']
 
 AUTH_USER_MODEL = 'harikatha.User'
 

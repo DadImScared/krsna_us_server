@@ -1,16 +1,6 @@
 version: '3'
 
 services:
-  nginx:
-    image: nginx:latest
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./config/nginx:/etc/nginx/conf.d
-      - .:/KrsnaUs
-      - ./static:/static
-    depends_on:
-      - krsnaus
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
     volumes: # Persist ES data in seperate "esdata" volume
@@ -38,11 +28,15 @@ services:
       - ./.env
     environment:
       - PYTHONUNBUFFERED=0
+      - VIRTUAL_HOST=www.gvparchives.com,gvparchives.com
+      - VIRTUAL_PORT=8000
     volumes:
       - .:/KrsnaUs
       - ./static:/static
     expose:
       - "8000"
+    ports:
+      - "8000:8000"
     depends_on:
       - db
       - elasticsearch
