@@ -4,7 +4,7 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
     volumes: # Persist ES data in seperate "esdata" volume
-      - ./esdata
+      - .:/esdata
     env_file:
       - ./.env
     ulimits:
