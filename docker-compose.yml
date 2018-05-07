@@ -40,3 +40,8 @@ services:
     depends_on:
       - db
       - elasticsearch
+
+networks:
+  default:
+    external:
+      name: nginxproxy
