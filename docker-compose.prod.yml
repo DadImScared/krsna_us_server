@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:latest
+    expose:
+      - "8001"
+    volumes:
+      - ./config/nginx:/etc/nginx/conf.d
+      - ./static:/static
+    environment:
+      - VIRTUAL_HOST=static.gvparchives.com
+      - VIRTUAL_PORT=8001
+      - LETSENCRYPT_HOST=static.gvparchives.com
+      - LETSENCRYPT_EMAIL=isadas@hotmail.com
+

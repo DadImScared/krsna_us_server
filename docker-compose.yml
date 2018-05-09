@@ -30,6 +30,8 @@ services:
       - PYTHONUNBUFFERED=0
       - VIRTUAL_HOST=www.gvparchives.com,gvparchives.com
       - VIRTUAL_PORT=8000
+      - LETSENCRYPT_HOST=www.gvparchives.com,gvparchives.com
+      - LETSENCRYPT_EMAIL=isadas@hotmail.com
     volumes:
       - .:/KrsnaUs
       - ./static:/static
@@ -44,4 +46,4 @@ services:
 networks:
   default:
     external:
-      name: nginxproxy
+      name: webproxy
