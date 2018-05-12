@@ -31,7 +31,7 @@ services:
       - VIRTUAL_HOST=www.gvparchives.com,gvparchives.com
       - VIRTUAL_PORT=8000
       - LETSENCRYPT_HOST=www.gvparchives.com,gvparchives.com
-      - LETSENCRYPT_EMAIL=isadas@hotmail.com
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     volumes:
       - .:/KrsnaUs
       - ./static:/static

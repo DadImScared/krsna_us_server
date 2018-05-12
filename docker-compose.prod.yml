@@ -12,5 +12,5 @@ services:
       - VIRTUAL_HOST=static.gvparchives.com
       - VIRTUAL_PORT=8001
       - LETSENCRYPT_HOST=static.gvparchives.com
-      - LETSENCRYPT_EMAIL=isadas@hotmail.com
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
 
