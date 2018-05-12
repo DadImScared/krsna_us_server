@@ -4,7 +4,7 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
     volumes: # Persist ES data in seperate "esdata" volume
-      - .:/esdata
+      - esdata:/usr/share/elasticsearch/data
     env_file:
       - ./.env
     ulimits:
@@ -21,6 +21,8 @@ services:
     image: postgres
     env_file:
       - ./.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   krsnaus:
     build: .
     command: ./start.sh
@@ -28,10 +30,6 @@ services:
       - ./.env
     environment:
       - PYTHONUNBUFFERED=0
-      - VIRTUAL_HOST=www.gvparchives.com,gvparchives.com
-      - VIRTUAL_PORT=8000
-      - LETSENCRYPT_HOST=www.gvparchives.com,gvparchives.com
-      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     volumes:
       - .:/KrsnaUs
       - ./static:/static
@@ -43,7 +41,6 @@ services:
       - db
       - elasticsearch
 
-networks:
-  default:
-    external:
-      name: webproxy
+volumes:
+  esdata:
+  postgres_data:
