@@ -202,7 +202,6 @@ class HariKathaCollectionView(generics.ListAPIView):
 
     def get_queryset(self):
         """Filter items based on categories query string"""
-        print('queryset here')
         categories = self.request.query_params.getlist('categories', CATEGORIES).lower()
         return HarikathaCollection.objects.filter(category__in=[category for category in categories])
 
@@ -268,5 +267,4 @@ class HariKathaCollectionAutoComplete(APIView):
                 }
             }
         )
-        # print(search.execute_suggest().title_complete[0]['options'][-1]['text'])
-        return Response(Suggestion(search.execute_suggest().title_complete[0]['options'], many=True).data)
+        return Response(Suggestion(search.execute().suggest.title_complete[0]['options'], many=True).data)

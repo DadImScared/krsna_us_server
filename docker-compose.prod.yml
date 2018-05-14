@@ -14,11 +14,13 @@ services:
       - LETSENCRYPT_HOST=static.gvparchives.com
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
   krsnaus:
+    expose:
+      - "8000"
     environment:
       - PYTHONUNBUFFERED=0
-      - VIRTUAL_HOST=www.gvparchives.com,gvparchives.com
+      - VIRTUAL_HOST=api.gvparchives.com
       - VIRTUAL_PORT=8000
-      - LETSENCRYPT_HOST=www.gvparchives.com,gvparchives.com
+      - LETSENCRYPT_HOST=api.gvparchives.com
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}    
 
 networks:
