@@ -1,16 +1,23 @@
 
 import uuid
-from django.utils import timezone
+from allauth.account.models import EmailAddress
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 
 from .search import HarikathaIndex
 
 # Create your models here.
 
 
+class CustomUserManager(UserManager):
+    def create_superuser(self, username, email, password, **extra_fields):
+        user = super().create_superuser(username, email, password, **extra_fields)
+        EmailAddress.objects.create(user=user, email=user.email, primary=True, verified=True)
+        return user
+
+
 class User(AbstractUser):
-    pass
+    objects = CustomUserManager()
 
 
 class HarikathaCollection(models.Model):
