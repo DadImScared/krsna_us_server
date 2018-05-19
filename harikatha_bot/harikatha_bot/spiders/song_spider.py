@@ -9,7 +9,7 @@ mp3_list = ['mp3', 'wav']
 class SongSpider(scrapy.Spider):
     """This spider collects all audio files and parses top level directories and saves files as category 'song'"""
     name = 'songs'
-    start_urls = ['http://sbnmcd.org/extradisk/bhajan/']
+    start_urls = ['https://sbnmcd.org/extradisk/bhajan/']
 
     custom_settings = {
         'ITEM_PIPELINES': {

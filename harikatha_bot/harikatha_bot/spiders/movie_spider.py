@@ -2,19 +2,20 @@
 import scrapy
 
 from ..items import HarikathaBotItem
+from ..utils import format_title
 
 
 class MovieSpider(scrapy.Spider):
     """Collects all movie links and saves them with the category of 'movie'"""
     name = 'movies'
     start_urls = [
-        'http://purebhakti.tv/movies.htm'
+        'http://purebhakti.tv/movielist2018_May.html'
     ]
 
     def parse(self, response):
-        for item in response.css('div a'):
+        for item in response.css('p a'):
             yield HarikathaBotItem({
                 'link': item.css('::attr(href)').extract_first().strip(),
-                'title': item.css('::text').extract_first().strip().replace('\t', '').replace('\n', ''),
+                'title': format_title(item.css('::text').extract_first().strip().replace('\t', '').replace('\n', '')),
                 'category': 'movie'
             })

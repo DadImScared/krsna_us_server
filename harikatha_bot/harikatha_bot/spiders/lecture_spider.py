@@ -9,7 +9,7 @@ from ..items import HarikathaBotItem
 class AudioLectureSpider(scrapy.Spider):
     """This spider collects all mp3 files and follows all directories and collects mp3 files in the directory"""
     name = 'lectures'
-    start_urls = ['http://sbnmcd.org/All_mp3/']
+    start_urls = ['https://sbnmcd.org/All_mp3/']
 
     def parse(self, response):
         """Collects all directories and audio files"""
