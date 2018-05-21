@@ -20,7 +20,10 @@ def index_harikatha():
             soup = bs(urlopen(req), 'html.parser')
         except UnicodeEncodeError:
             continue
+        # magazines from 1996 are parsed at a different link and have a different wrapper for the <p> tags
         article = soup.find('div', class_='item-pagelectures')
+        if article is None and '1996' in magazine.title:
+            article = soup.find('body')
         if article:
             content = article.find_all('p')
             body = " ".join([p.get_text() for p in content])

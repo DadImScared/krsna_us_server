@@ -3,7 +3,8 @@ import os
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from elasticsearch_dsl.connections import connections
-from elasticsearch_dsl import DocType, Date, Text, Completion, analyzer, token_filter
+from elasticsearch_dsl.exceptions import IllegalOperation
+from elasticsearch_dsl import DocType, Text, Completion, analyzer, token_filter
 from . import models
 
 
@@ -16,12 +17,6 @@ def get_connection_info():
 connections.create_connection(
     hosts=[get_connection_info()]
 )
-
-# es = Elasticsearch()
-# es.indices.close(index='harikatha-index')
-# es.indices.delete(index='harikatha-index')
-
-# print(es.indices.get_mapping(index='harikatha-index'))
 
 stop_word_filter = token_filter('stop_word_filter', type='stop', stopwords='_english_')
 my_filter = token_filter('my_filter', type='shingle', min_shingle_size=2, max_shingle_size=3)
@@ -42,7 +37,7 @@ content_suggestion_analysis = analyzer('content_suggestion_analysis',
 
 
 class HarikathaIndex(DocType):
-    title = Text()
+    title = Text(analyzer=content_analysis)
     title_suggest = Completion(contexts=[{"name": "category_type", "type": "category"}])
     phrase_suggest = Text(analyzer=my_analysis)
     body = Text(analyzer=content_analysis)
@@ -63,45 +58,10 @@ class HarikathaIndex(DocType):
 
 
 def bulk_indexing():
-    HarikathaIndex.init()
+    # create index if it doesn't exist
+    try:
+        HarikathaIndex.init()
+    except IllegalOperation:
+        pass
     es = Elasticsearch(hosts=[get_connection_info()])
     bulk(client=es, actions=(item.indexing() for item in models.HarikathaCollection.objects.all().iterator()))
-
-
-# HarikathaIndex.init()
-# es.indices.open(index='harikatha-index')
-# item = HarikathaIndex(
-#     meta={"id": 1},
-#     title="this title",
-#     title_suggest={"input": "this title", "contexts": {"category_type": "category here"}},
-#     link="link here",
-#     category="category here",
-#     phrase_suggest="this title"
-# )
-# item.save()
-# item.delete()
-
-# es.indices.open(index="harikatha-index")
-# print(HarikathaIndex.search().execute())
-# s = HarikathaIndex.search()
-# print(s.execute())
-# s = s.suggest(
-#     'other_suggestions',
-#     'thsi tite',
-#     phrase={
-#         'field': 'phrase_suggest',
-#         "max_errors": 2,
-#     }
-# )
-# s = s.suggest(
-#     'other_suggestions',
-#     'this',
-#     completion={
-#         "field": "title_suggest",
-#         "contexts": {
-#             "category_type": "category here"
-#         }
-#     }
-# )
-# print(s.execute().suggest.other_suggestions)
-# print(item)

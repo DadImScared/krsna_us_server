@@ -15,4 +15,5 @@ if __name__ == '__main__':
     process.crawl('movies')
     process.crawl('lectures')
     process.crawl('hknewsletter')
+    process.crawl('hk1996')
     process.start()
