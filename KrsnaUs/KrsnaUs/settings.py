@@ -41,7 +41,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY', config.SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', config.DEBUG)
+debug_str = os.getenv('DEBUG', config.DEBUG)
+DEBUG = debug_str if type(debug_str) == bool else debug_str == 'True'
 
 ALLOWED_HOSTS = ['localhost', '.gvparchives.com', 'krsnaus']
 
