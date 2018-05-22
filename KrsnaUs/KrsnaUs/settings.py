@@ -55,12 +55,12 @@ CLIENT_URL = os.getenv('CLIENT_URL', config.CLIENT_URL)
 DEV_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 PROD_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = DEV_BACKEND if DEBUG else PROD_BACKEND
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = 587 if DEBUG else 465
 EMAIL_HOST_USER = os.getenv('EMAIL_USER', config.EMAIL_USER)
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS', config.EMAIL_PASS)
 EMAIL_USE_TLS = True
-EMAIL_SSL = False
+EMAIL_SSL = not DEBUG
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
 OLD_PASSWORD_FIELD_ENABLED = True
@@ -69,6 +69,7 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_CONFIRMATION_COOLDOWN = 20
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -201,5 +202,5 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = os.getenv('STATIC_URL', '/static/')
 STATIC_ROOT = '/static/'
