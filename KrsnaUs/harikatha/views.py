@@ -94,8 +94,7 @@ class AccountConfirm(APIView):
 
     def get(self, request, key, *args, **kwargs):
         """Make post request to verify_email endpoint"""
-        requests.post(reverse('rest_verify_email'), data={'key': key})
-        # r = requests.post('http://127.0.0.1:8000/rest-auth/registration/verify-email/', data={'key': key})
+        requests.post(request.build_absolute_uri(reverse('rest_verify_email')), data={'key': key})
         return HttpResponseRedirect(settings.CLIENT_URL)
 
 
