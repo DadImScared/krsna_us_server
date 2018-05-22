@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.conf import settings
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import list_route
+from rest_framework.reverse import reverse
 from rest_framework.views import APIView, Response
 from rest_auth.registration.views import SocialLoginView
 
@@ -93,7 +94,8 @@ class AccountConfirm(APIView):
 
     def get(self, request, key, *args, **kwargs):
         """Make post request to verify_email endpoint"""
-        r = requests.post('http://127.0.0.1:8000/rest-auth/registration/verify-email/', data={'key': key})
+        requests.post(reverse('rest_verify_email'), data={'key': key})
+        # r = requests.post('http://127.0.0.1:8000/rest-auth/registration/verify-email/', data={'key': key})
         return HttpResponseRedirect(settings.CLIENT_URL)
 
 

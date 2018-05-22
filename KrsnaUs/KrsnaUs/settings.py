@@ -56,11 +56,11 @@ DEV_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 PROD_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND = DEV_BACKEND if DEBUG else PROD_BACKEND
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = 587 if DEBUG else 465
+EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv('EMAIL_USER', config.EMAIL_USER)
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS', config.EMAIL_PASS)
-EMAIL_USE_TLS = DEBUG
-EMAIL_SSL = not DEBUG
+EMAIL_USE_TLS = True
+EMAIL_SSL = False
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
