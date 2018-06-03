@@ -58,6 +58,17 @@ class HariKathaCollectionViewTestWithCategories(APITestCase):
             self.assertEqual(item['category'], 'harikatha')
 
 
+class AllView(BaseTestCase):
+
+    def test_all_view(self):
+        response = self.client.get(reverse('all_items'))
+        self.assertTrue(response.data)
+
+    def test_all_search_view(self):
+        response = self.client.get(reverse('search-all-items', args=('title',)))
+        self.assertTrue(response.data)
+
+
 class SearchViewTest(APITestCase):
 
     def test_search_collection(self):

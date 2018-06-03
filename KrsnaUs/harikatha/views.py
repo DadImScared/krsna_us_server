@@ -1,5 +1,6 @@
 
 import requests
+import collections
 from allauth.account.models import EmailAddress
 from allauth.account.utils import send_email_confirmation
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -195,6 +196,36 @@ class GoogleLogin(SocialLoginView):
 
 class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
+
+
+class AllItemsView(APIView):
+    """View that displays all items not made for a client but for backend tools"""
+
+    def get(self, request):
+        queryset = HarikathaCollection.objects
+        data = {
+            "books": HarikathaItem(queryset.filter(category='book'),  many=True).data,
+            "movies": HarikathaItem(queryset.filter(category='movie'), many=True).data,
+            "lectures": HarikathaItem(queryset.filter(category='lecture'), many=True).data,
+            "songs": HarikathaItem(queryset.filter(category='song'), many=True).data,
+            "bhagavatpatrika": HarikathaItem(queryset.filter(category='bhagavatpatrika'), many=True).data,
+            "harikatha": HarikathaItem(queryset.filter(category='harikatha'), many=True).data,
+            "harmonistmagazine": HarikathaItem(queryset.filter(category='harmonistmagazine'), many=True).data,
+            "harmonistmonthly": HarikathaItem(queryset.filter(category='harmonistmonthly'), many=True).data
+        }
+        return Response(data)
+
+
+class AllItemsSearchView(APIView):
+
+    def get(self, request, query: str):
+        plurals = ['movie', 'song', 'lecture', 'book']
+        query = query
+        queryset = HarikathaCollection.objects.filter(title__icontains=query)
+        data = collections.defaultdict(list)
+        for item in queryset:
+            data[item.category + 's' if item.category in plurals else item.category].append(HarikathaItem(item).data)
+        return Response(data)
 
 
 class HariKathaCollectionView(generics.ListAPIView):
