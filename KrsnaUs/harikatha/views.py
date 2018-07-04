@@ -8,6 +8,7 @@ from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from django.db.models import F
 from django.http import HttpResponseRedirect
 from django.conf import settings
+from elasticsearch_dsl.query import MultiMatch
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import list_route
 from rest_framework.reverse import reverse
@@ -39,12 +40,15 @@ CATEGORIES = ["book", "movie", "song", "harikatha",
 
 def get_query(categories, query):
     """Return elastic search query with filter if not all categories are in list else no filter"""
+    q1 = MultiMatch(query=query, fields=['title', 'body'])
+    q2 = MultiMatch(query=query, fields=['title', 'body'], type='phrase_prefix', max_expansions=200)
+    query = q1 | q2
     if len(categories) == len(CATEGORIES) or len(categories) == 0:
-        return HarikathaIndex.search().query('multi_match', query=query, fields=['title', 'body'])
+        return HarikathaIndex.search().query(query)
     else:
         return HarikathaIndex.search().filter(
             'terms', category=[category for category in categories]
-        ).query('multi_match', query=query, fields=['title', 'body'])
+        ).query(query)
 
 
 def add_suggestion(elastic_query, search_word):
@@ -268,7 +272,7 @@ class HariKathaCollectionSearch(APIView):
         )
         search_query = paged_query.query
         search_query = add_suggestion(search_query, query)
-        search_query = search_query.highlight('title')
+        search_query = search_query.highlight('title', fragment_size=200)
         search_query = search_query.highlight('body', fragment_size=200)
         results = search_query.execute()
         response = {
