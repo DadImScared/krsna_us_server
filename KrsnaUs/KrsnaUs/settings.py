@@ -44,7 +44,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', config.SECRET_KEY)
 debug_str = os.getenv('DEBUG', config.DEBUG)
 DEBUG = debug_str if type(debug_str) == bool else debug_str == 'True'
 
-ALLOWED_HOSTS = ['localhost', '.gvparchives.com', 'krsnaus']
+ALLOWED_HOSTS = ['localhost', '.gvparchives.com', 'krsnaus', '192.168.0.11', "*"]
 
 AUTH_USER_MODEL = 'harikatha.User'
 

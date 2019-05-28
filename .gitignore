@@ -2,6 +2,8 @@ config.py
 .env
 fixtures
 /static/
+krsna-us-950d924d0f92.json
+sqlharikathakey.json
 
 # Created by https://www.gitignore.io/api/python,pycharm
 

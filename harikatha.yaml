@@ -1,0 +1,193 @@
+# [START elasticsearch service]
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  labels:
+    app: elasticsearch
+spec:
+  selector:
+    app: elasticsearch-container
+  type: ClusterIP
+  ports:
+    - port: 9200
+
+# [END elasticsearch service
+
+---
+
+# [START elastic search persistent volume claim]
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch-volumeclaim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi
+# [END elastic search persistent volume claim]
+
+---
+
+# [START elasticsearch deployment]
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch-container
+  template:
+    metadata:
+      labels:
+        app: elasticsearch-container
+    spec:
+      initContainers:
+        - name: fix-volume-permission
+          image: busybox
+          command:
+            - sh
+            - -c
+            - chown -R 1000:1000 /usr/share/elasticsearch/data
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - name: elasticsearch-volume-mount
+            mountPath: /usr/share/elasticsearch/data
+        - name: increase-vm-max-map-count
+          image: busybox
+          command:
+            - sysctl
+            - -w
+            - vm.max_map_count=262144
+          securityContext:
+             privileged: true
+      containers:
+        - name: elasticsearch-container
+          image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+          env:
+            - name: ES_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: prod-secrets
+                  key: ES_NAME
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: prod-secrets
+                  key: ELASTIC_PASSWORD
+            - name: cluster.name
+              value: "docker-cluster"
+            - name: "BOOTSTRAP_MEMORY_LOCK"
+              value: "true"
+            - name: "ES_JAVA_OPTS"
+              value: -Xms512m -Xmx512m
+          ports:
+            - containerPort: 9200
+          volumeMounts:
+            - name: elasticsearch-volume-mount
+              mountPath: /usr/share/elasticsearch/data
+      volumes:
+        - name: elasticsearch-volume-mount
+          persistentVolumeClaim:
+            claimName: elasticsearch-volumeclaim
+        - name: dshm
+          emptyDir:
+            medium: Memory
+
+# [END elasticsearch deployment]
+
+---
+
+# [START krsna_us deployment]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: krsna-us
+  labels:
+    app: krsna-us
+spec:
+  selector:
+    matchLabels:
+      app: krsna-us
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: krsna-us
+    spec:
+      containers:
+        - name: krsna-us-app
+          image: gcr.io/krsna-us/harikatha:latest
+          volumeMounts:
+          - name: prod-secrets
+            mountPath: /prod/secrets
+            readOnly: true
+          imagePullPolicy: Always
+          env:
+          - name: RESTART
+            value: "26"
+          envFrom:
+            - secretRef:
+                name: prod-secrets
+          env:
+            - name: PSG_HOST
+              value: 127.0.0.1
+            - name: POSTGRES_DB
+              value: krsna_us
+          ports:
+          - containerPort: 8000
+
+        - image: b.gcr.io/cloudsql-docker/gce-proxy:latest
+          name: cloudsql-proxy
+          securityContext:
+            runAsUser: 2  # non-root user
+            allowPrivilegeEscalation: false
+          command: ["/cloud_sql_proxy", "--dir=/cloudsql",
+                "-instances=krsna-us:us-central1:harikatha-instance=tcp:5432",
+                "-credential_file=/secrets/cloudsql/credentials.json"]
+          volumeMounts:
+            - name: cloudsql-oauth-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
+            - name: ssl-certs
+              mountPath: /etc/ssl/certs
+            - name: cloudsql
+              mountPath: /cloudsql
+      volumes:
+        - name: cloudsql-oauth-credentials
+          secret:
+            secretName: cloudsql-oauth-credentials
+        - name: prod-secrets
+          secret:
+            secretName: prod-secrets
+        - name: ssl-certs
+          hostPath:
+            path: /etc/ssl/certs
+        - name: cloudsql
+          emptyDir:
+# [END krsna_us deployment]
+
+---
+
+# [START krsna_us service]
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: krsna-us
+  name: krsna-us
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8000
+  selector:
+    app: krsna-us
+# [END krsna_us service]
