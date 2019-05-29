@@ -21,17 +21,17 @@ class BookSpider(scrapy.Spider):
 
     def parse(self, response):
         """Collects all book links and follows next page"""
-        for book in response.css('.-koowa-grid .docman_document'):
+        for book in response.css('form.k-js-grid-controller .docman_document .koowa_header__title_link'):
 
             language = response.url.rsplit('.', 1)[0].rsplit('/', 1)[1]
             yield HarikathaBotItem({
-                'link': response.urljoin(book.css('.docman_download__button::attr(href)').extract_first().strip()),
-                'title': book.css('.koowa_header__title_link span::text').extract_first().strip(),
+                'link': response.urljoin(book.css('::attr(href)').extract_first().strip()),
+                'title': book.css('::text').extract_first().strip(),
                 'language': language,
                 'category': 'book'
             })
 
-        pages = response.css('.pagination-list li')
+        pages = response.css('form.k-js-grid-controller div.k-pagination li')
         if pages:
             last_item = pages[-1].css("a::text").extract_first()
             # check if last item in pagination list is a next arrow

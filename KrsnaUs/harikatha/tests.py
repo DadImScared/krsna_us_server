@@ -1,5 +1,7 @@
 
 import inspect
+import re
+import requests
 from django.core import mail
 from django.contrib.auth.models import Permission
 from django.utils.http import urlencode
@@ -9,11 +11,19 @@ from allauth.account.models import EmailAddress
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.reverse import reverse
+from scrapy.http import Request, Response, HtmlResponse
 
 from .admin import HariKathaCollectionForm
 from .models import HarikathaIndex, Playlists
 from .utils import PaginatedQuery
 from . import factories
+from harikatha_bot.harikatha_bot.spiders import (
+    bhagavat_patrika_spider,
+    harikatha_spider,
+    hmonthly_spider,
+    hmagazine_spider,
+    book_spider
+)
 
 # Create your tests here.
 
@@ -417,3 +427,106 @@ class TestHarikathaCollectionAdmin(BaseTestCase):
         self.add_permission(self.user, 'harikatha')
         form = HariKathaCollectionForm(current_user=self.user)
         self.assertEqual(form.fields['category'].choices[0][0], 'harikatha')
+
+
+class BaseSpiderTest(APITestCase):
+
+    def start_urls(self):
+        return self.spider.start_urls
+
+    def get_collection(self, index=0):
+        return list(self.spider.parse(self.make_request(self.start_urls()[index])))
+
+    def assert_collection_item(self, item, last_item=False):
+        pass
+
+    def has_next_page(self, item):
+        """Checks for url in scrapy Response object
+
+        :param item: HarikathabotItem or scrapy Response
+        :return:
+        """
+        return hasattr(item, "url")
+
+    def make_request(self, url):
+        """Make scrapy request and HtmlResponse"""
+        scrapy_request = Request(url)
+        request = requests.get(url)
+        return HtmlResponse(url=url, request=scrapy_request, body=request.text, encoding='utf-8')
+
+    def assert_collection(self, collection):
+        self.assertTrue(collection)
+        for index, item in enumerate(collection):
+            if index == len(collection) - 1:
+                # assert next page or last item on last page
+                self.assert_collection_item(item, True)
+            else:
+                self.assert_collection_item(item)
+
+
+class TestBhagavatPatrikaSpider(BaseSpiderTest):
+
+    def setUp(self):
+        self.spider = bhagavat_patrika_spider.BhagavatPatrikaSpider()
+
+    def assert_collection_item(self, item, last_item=False):
+        if last_item:
+            # assert next page or last item on last page
+            self.assertTrue(hasattr(item, "url") or "Year" in item["title"])
+        else:
+            self.assertTrue("Year" in item["title"])
+
+    def test_parse(self):
+        first_page = self.make_request(self.spider.start_urls[0])
+        result = list(self.spider.parse(first_page))
+        self.assert_collection(result)
+        next_page = list(self.spider.parse(self.make_request(result[-1].url)))
+        self.assert_collection(next_page)
+
+
+class TestHarikathaSpidier(BaseSpiderTest):
+    def setUp(self):
+        self.spider = harikatha_spider.HariKathaSpider()
+
+    def test_parse(self):
+        result = list(self.spider.parse(self.make_request('http://www.purebhakti.com/')))
+        self.assert_collection(result)
+
+
+class TestHarmonistMonthlySpider(BaseSpiderTest):
+    def setUp(self):
+        self.spider = hmonthly_spider.HarmonistMonthlySpider()
+
+    def assert_collection_item(self, item, last_item=False):
+        if last_item:
+            self.assertTrue(self.has_next_page(item) or "harmonist-monthly" in item["link"])
+        else:
+            self.assertTrue("harmonist-monthly" in item["link"])
+
+    def test_parse(self):
+        result = self.get_collection()
+        self.assert_collection(result)
+
+
+class TestHarmonistMagazineSpider(BaseSpiderTest):
+    def setUp(self):
+        self.spider = hmagazine_spider.HarmonistMagazineSpider()
+
+    def assert_collection_item(self, item, last_item=False):
+        if last_item:
+            self.assertTrue(self.has_next_page(item) or "harmonist-magazine" in item["link"])
+        else:
+            self.assertTrue("harmonist-magazine" in item["link"])
+
+    def test_parse(self):
+        result = self.get_collection()
+        self.assert_collection(result)
+
+
+class TestBookSpider(BaseSpiderTest):
+    def setUp(self):
+        self.spider = book_spider.BookSpider()
+
+    def test_parse(self):
+        result = self.get_collection(0)
+        self.assert_collection(result)

@@ -16,14 +16,14 @@ class HarmonistMagazineSpider(scrapy.Spider):
 
     def parse(self, response):
         """Collects all links and follows links"""
-        for book in response.css('.-koowa-grid .docman_document'):
+        for book in response.css('.k-js-grid-controller .docman_document .koowa_header__title_link'):
             yield HarikathaBotItem({
-                'link': response.urljoin(book.css('.docman_download__button::attr(href)').extract_first().strip()),
-                'title': book.css('.koowa_header__title_link span::text').extract_first().strip(),
+                'link': response.urljoin(book.css('::attr(href)').extract_first().strip()),
+                'title': book.css('::text').extract_first().strip(),
                 'category': 'harmonistmagazine'
             })
 
-        pages = response.css('.pagination-list li')
+        pages = response.css('form.k-js-grid-controller div.k-pagination li')
         if pages:
             last_item = pages[-1].css("a::text").extract_first()
             # check if last item in pagination list is a next arrow

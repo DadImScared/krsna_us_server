@@ -14,7 +14,7 @@
   </component>
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Remote Python 3.5.2 Docker Compose (krsnaus at [C:\Users\murli\PycharmProjects\krsna_us\docker-compose.yml, C:\Users\murli\PycharmProjects\krsna_us\docker-compose.override.yml])" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TemplatesService">

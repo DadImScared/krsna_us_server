@@ -30,13 +30,14 @@ class BhagavatPatrikaSpider(scrapy.Spider):
 
     def parse(self, response):
         """Collects all magazine links and follows next page"""
-        for item in response.css('form.-koowa-grid .docman_document'):
+        for item in response.css('form.k-js-grid-controller .docman_document .koowa_header__title_link'):
             yield HarikathaBotItem(**{
-                'link': response.urljoin(item.css('.docman_download__button::attr(href)').extract_first().strip()),
-                'title': item.css('.koowa_header__item .koowa_header__title_link span::text').extract_first().strip(),
+                'link': response.urljoin(item.css('::attr(href)').extract_first().strip()),
+                'title': item.css('::text').extract_first().strip(),
                 'category': 'bhagavatpatrika'
             })
-        pages = response.css('.pagination-list li')
+
+        pages = response.css('form.k-js-grid-controller div.k-pagination li')
         if pages:
             last_item = pages[-1].css("a::text").extract_first()
             # check if last item in pagination list is a next arrow
