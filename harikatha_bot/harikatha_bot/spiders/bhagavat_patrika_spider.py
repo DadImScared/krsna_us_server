@@ -11,13 +11,13 @@ class BhagavatPatrikaSpider(scrapy.Spider):
     name = 'bhagavatpatrika'
     start_urls = [
         # 'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhagavat-patrika.html'
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhagavat-patrika/year-1955-1959.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhagavat-patrika/year-1960-1964.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhagavat-patrika/year-1965-1969.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhagavat-patrika/year-1970-1974.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhagavat-patrika/year-1996-2000.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhagavat-patrika/year-2001-2005.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhagavat-patrika/year-2010-2015.html',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhagavat-patrika/year-1955-1959',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhagavat-patrika/year-1960-1964',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhagavat-patrika/year-1965-1969',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhagavat-patrika/year-1970-1974',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhagavat-patrika/year-1996-2000',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhagavat-patrika/year-2001-2005',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhagavat-patrika/year-2010-2015',
 
     ]
 

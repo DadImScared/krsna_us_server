@@ -11,7 +11,7 @@ class HarmonistMagazineSpider(scrapy.Spider):
     """Collects all magazine links and saves them with the category harmonistmagazine"""
     name = 'hmagazine'
     start_urls = [
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/harmonist-magazine.html'
+        'http://www.purebhakti.com/resources/ebooks-magazines/harmonist-magazine'
     ]
 
     def parse(self, response):

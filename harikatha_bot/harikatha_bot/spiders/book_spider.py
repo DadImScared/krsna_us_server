@@ -11,19 +11,20 @@ class BookSpider(scrapy.Spider):
     """Collects all books from the start_urls attr and saves with category 'book'"""
     name = 'books'
     start_urls = [
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhakti-books/english.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhakti-books/bengali.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhakti-books/german.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhakti-books/hindi.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhakti-books/russian.html',
-        'http://www.purebhakti.com/resources/ebooks-a-magazines-mainmenu-63/bhakti-books/spanish.html'
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhakti-books/english',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhakti-books/bengali',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhakti-books/german',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhakti-books/hindi',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhakti-books/russian',
+        'http://www.purebhakti.com/resources/ebooks-magazines/bhakti-books/spanish'
     ]
 
     def parse(self, response):
         """Collects all book links and follows next page"""
         for book in response.css('form.k-js-grid-controller .docman_document .koowa_header__title_link'):
 
-            language = response.url.rsplit('.', 1)[0].rsplit('/', 1)[1]
+            language = response.url.rsplit("/", 1)[1].split("?")[0]
+
             yield HarikathaBotItem({
                 'link': response.urljoin(book.css('::attr(href)').extract_first().strip()),
                 'title': book.css('::text').extract_first().strip(),

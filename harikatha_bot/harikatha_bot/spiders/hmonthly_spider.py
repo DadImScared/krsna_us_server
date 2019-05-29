@@ -9,7 +9,7 @@ class HarmonistMonthlySpider(scrapy.Spider):
     """Collects all links"""
     name = 'hmonthly'
     start_urls = [
-        'http://www.purebhakti.com/resources/harmonist-monthly.html'
+        'http://www.purebhakti.com/resources/harmonist-monthly'
     ]
 
     def parse(self, response):

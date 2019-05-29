@@ -527,6 +527,14 @@ class TestBookSpider(BaseSpiderTest):
     def setUp(self):
         self.spider = book_spider.BookSpider()
 
+    def assert_collection_item(self, item, last_item=False):
+        if last_item:
+            self.assertTrue(self.has_next_page(item) or item["language"] == "english")
+        else:
+            self.assertTrue(item["language"] == "english")
+
     def test_parse(self):
         result = self.get_collection(0)
         self.assert_collection(result)
+        second_page = list(self.spider.parse(self.make_request(result[-1].url)))
+        self.assert_collection(second_page)

@@ -130,13 +130,12 @@ spec:
             mountPath: /prod/secrets
             readOnly: true
           imagePullPolicy: Always
-          env:
-          - name: RESTART
-            value: "26"
           envFrom:
             - secretRef:
                 name: prod-secrets
           env:
+            - name: RESTART
+              value: "28"
             - name: PSG_HOST
               value: 127.0.0.1
             - name: POSTGRES_DB
