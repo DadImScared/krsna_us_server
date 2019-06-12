@@ -116,7 +116,7 @@ spec:
   selector:
     matchLabels:
       app: krsna-us
-  replicas: 3
+  replicas: 2
   template:
     metadata:
       labels:
@@ -135,7 +135,7 @@ spec:
                 name: prod-secrets
           env:
             - name: RESTART
-              value: "28"
+              value: "30"
             - name: PSG_HOST
               value: 127.0.0.1
             - name: POSTGRES_DB
@@ -184,6 +184,7 @@ metadata:
   name: krsna-us
 spec:
   type: LoadBalancer
+  loadBalancerIP: 34.66.224.142
   ports:
     - port: 80
       targetPort: 8000
